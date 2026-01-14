@@ -1,0 +1,65 @@
+@using Microsoft.AspNetCore.Authentication
+@{
+    ViewData["Title"] = "Firebase Micro-Frontend";
+    var authResult = await Context.AuthenticateAsync();
+    var idToken = authResult.Properties?.GetTokenValue("id_token");
+    var accessToken = authResult.Properties?.GetTokenValue("access_token");
+}
+
+<div class="hero">
+    <div class="container">
+        <h1>Firebase Micro-Frontend</h1>
+        <p class="lead">This Firebase app runs within the MVC application using your Identity Provider authentication</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-title">Parent MVC App - User Info</h6>
+                    <p class="mb-0"><strong>Logged in as:</strong> @User.Identity?.Name</p>
+                </div>
+            </div>
+
+            <div class="firebase-container">
+                <iframe id="firebase-iframe"
+                        src="/firebase/index.html"
+                        style="width: 100%; height: 600px; border: none;"
+                        allow="cross-origin-isolated">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Pass tokens to the Firebase micro-frontend
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'REQUEST_TOKENS') {
+                const iframe = document.getElementById('firebase-iframe');
+                iframe.contentWindow.postMessage({
+                    type: 'TOKENS',
+                    idToken: '@Html.Raw(idToken ?? "")',
+                    accessToken: '@Html.Raw(accessToken ?? "")',
+                    userName: '@User.Identity?.Name'
+                }, '*');
+            }
+        });
+
+        // Automatically send tokens when iframe loads
+        document.getElementById('firebase-iframe').addEventListener('load', function() {
+            setTimeout(function() {
+                const iframe = document.getElementById('firebase-iframe');
+                iframe.contentWindow.postMessage({
+                    type: 'TOKENS',
+                    idToken: '@Html.Raw(idToken ?? "")',
+                    accessToken: '@Html.Raw(accessToken ?? "")',
+                    userName: '@User.Identity?.Name'
+                }, '*');
+            }, 500);
+        });
+    </script>
+}

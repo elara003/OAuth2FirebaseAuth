@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase App - Micro Frontend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .firebase-app {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .status-authenticated {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-unauthenticated {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-emulator {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .token-display {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .firebase-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .emulator-badge {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="firebase-app">
+        <div class="d-flex align-items-center mb-4">
+            <svg class="firebase-logo" viewBox="0 0 256 351" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="c" width="200%" height="200%" x="-50%" y="-50%">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="17.5"/>
+                        <feOffset dy="10" result="offsetblur"/>
+                        <feFlood flood-color="#0002"/>
+                        <feComposite in2="offsetblur" operator="in"/>
+                        <feMerge>
+                            <feMergeNode/><feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <path fill="#FFA000" d="M1.25 280.73l2.14-3.93 46.18-85.02-38.24-74.47L1.25 280.73z"/>
+                <path fill="#F57F17" d="M134 121.27L96.55 77.38 11.08 191.78 134 121.27z"/>
+                <path fill="#FFCA28" d="M1.25 280.73L1.25 280.73 134 121.27 96.55 77.38 1.25 280.73z"/>
+                <path fill="#FFA000" d="M134 121.27l-41.45 43.89L70.5 117.69 134 121.27z"/>
+                <path fill="#F57F17" d="M127.58 0L70.5 117.69 92.55 165.16 134 121.27 127.58 0z"/>
+                <path fill="#FFA000" d="M127.58 0l6.42 121.27 66 39.46L127.58 0z"/>
+                <path fill="#FFCA28" d="M1.25 280.73L127.58 351l72.42-42V280.73H1.25z"/>
+                <path fill="#F57F17" d="M127.58 351L256 280.73V233.18L1.25 280.73 127.58 351z"/>
+                <path fill="#F57F17" d="M134 121.27L200 160.73 127.58 0 134 121.27z"/>
+                <path fill="#FFCA28" d="M200 160.73L256 280.73V233.18L200 160.73z"/>
+            </svg>
+            <h4 class="mb-0">Firebase Micro-Frontend</h4>
+            <span id="emulator-indicator" class="emulator-badge" style="display: none;">EMULATOR</span>
+        </div>
+
+        <!-- Authentication Status -->
+        <div id="auth-status" class="mb-4">
+            <h6>Authentication Status</h6>
+            <span id="status-badge" class="status-badge status-unauthenticated">Not Authenticated</span>
+        </div>
+
+        <!-- User Info -->
+        <div id="user-info" class="mb-4" style="display: none;">
+            <h6>User Information</h6>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Firebase UID:</strong> <span id="firebase-uid">-</span></p>
+                    <p><strong>Email:</strong> <span id="user-email">-</span></p>
+                    <p><strong>Display Name:</strong> <span id="display-name">-</span></p>
+                    <p><strong>Identity Provider:</strong> <span id="auth-provider">-</span></p>
+                    <p><strong>IdP Subject:</strong> <span id="idp-subject">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div id="login-actions" class="mb-4">
+            <h6>Authentication</h6>
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Login using your IdentityServer credentials. The backend will exchange the auth code
+                        for tokens and mint a Firebase custom token.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button id="btn-login-redirect" class="btn btn-primary" onclick="loginWithIdentityServer()">
+                            Login with IdentityServer
+                        </button>
+                        <button id="btn-login-popup" class="btn btn-outline-primary" onclick="loginWithPopup()">
+                            Login (Popup)
+                        </button>
+                        <button id="btn-logout" class="btn btn-danger" onclick="logout()" style="display: none;">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Firestore Demo -->
+        <div id="firestore-demo" class="mb-4" style="display: none;">
+            <h6>Firestore Demo</h6>
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="message-input" class="form-control" placeholder="Enter a message">
+                        <button class="btn btn-primary" onclick="saveMessage()">Save to Firestore</button>
+                    </div>
+                    <div id="messages-list">
+                        <p class="text-muted">No messages yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div>
+            <h6>Activity Log</h6>
+            <div id="logs" class="token-display" style="height: 150px;">
+                Waiting for activity...
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import {
+            getAuth,
+            connectAuthEmulator,
+            signInWithCustomToken,
+            onAuthStateChanged,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import {
+            getFirestore,
+            connectFirestoreEmulator,
+            collection,
+            addDoc,
+            query,
+            orderBy,
+            limit,
+            onSnapshot,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // ========================================
+        // CONFIGURATION
+        // ========================================
+
+        // Set to true to use Firebase emulators for local development
+        const USE_EMULATORS = true;
+
+        // Emulator configuration
+        const EMULATOR_CONFIG = {
+            auth: { host: 'localhost', port: 9099 },
+            firestore: { host: 'localhost', port: 8080 }
+        };
+
+        // OAuth2 Authorization Server endpoint (our backend)
+        const AUTH_ENDPOINT = '/api/firebase-auth/login';
+
+        // Firebase configuration - For emulators, you can use a demo project
+        const firebaseConfig = USE_EMULATORS ? {
+            apiKey: "demo-api-key",
+            authDomain: "localhost",
+            projectId: "demo-oauth-firebase",
+            storageBucket: "demo-oauth-firebase.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        } : {
+            // PRODUCTION CONFIG - Replace with your actual Firebase config
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Connect to emulators if enabled
+            if (USE_EMULATORS) {
+                connectAuthEmulator(auth, `http://${EMULATOR_CONFIG.auth.host}:${EMULATOR_CONFIG.auth.port}`, { disableWarnings: true });
+                connectFirestoreEmulator(db, EMULATOR_CONFIG.firestore.host, EMULATOR_CONFIG.firestore.port);
+                document.getElementById('emulator-indicator').style.display = 'inline';
+                log('🔧 Connected to Firebase Emulators');
+                log(`   Auth: http://${EMULATOR_CONFIG.auth.host}:${EMULATOR_CONFIG.auth.port}`);
+                log(`   Firestore: http://${EMULATOR_CONFIG.firestore.host}:${EMULATOR_CONFIG.firestore.port}`);
+            }
+
+            log('Firebase initialized successfully');
+        } catch (error) {
+            log('Firebase initialization error: ' + error.message);
+        }
+
+        // Log function
+        function log(message) {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML = `[${timestamp}] ${message}\n` + logsDiv.innerHTML;
+        }
+
+        // Update UI based on auth state
+        function updateUI(user) {
+            const statusBadge = document.getElementById('status-badge');
+            const userInfo = document.getElementById('user-info');
+            const btnLogout = document.getElementById('btn-logout');
+            const firestoreDemo = document.getElementById('firestore-demo');
+            const loginButtons = document.querySelectorAll('#btn-login-redirect, #btn-login-popup');
+
+            if (user) {
+                statusBadge.textContent = 'Authenticated';
+                statusBadge.className = 'status-badge status-authenticated';
+                userInfo.style.display = 'block';
+                btnLogout.style.display = 'inline-block';
+                firestoreDemo.style.display = 'block';
+                loginButtons.forEach(btn => btn.style.display = 'none');
+
+                document.getElementById('firebase-uid').textContent = user.uid;
+
+                // Get custom claims
+                user.getIdTokenResult().then(idTokenResult => {
+                    const claims = idTokenResult.claims;
+                    document.getElementById('user-email').textContent = claims.email || user.email || 'N/A';
+                    document.getElementById('display-name').textContent = claims.name || user.displayName || 'N/A';
+                    document.getElementById('auth-provider').textContent = claims.identity_provider || 'custom';
+                    document.getElementById('idp-subject').textContent = claims.idp_sub || 'N/A';
+                });
+
+                log('User authenticated: ' + (user.email || user.uid));
+                loadMessages();
+            } else {
+                statusBadge.textContent = 'Not Authenticated';
+                statusBadge.className = 'status-badge status-unauthenticated';
+                userInfo.style.display = 'none';
+                btnLogout.style.display = 'none';
+                firestoreDemo.style.display = 'none';
+                loginButtons.forEach(btn => btn.style.display = 'inline-block');
+
+                log('User not authenticated');
+            }
+        }
+
+        // Auth state observer
+        if (auth) {
+            onAuthStateChanged(auth, updateUI);
+        }
+
+        // Check for stored token from redirect flow
+        async function checkStoredToken() {
+            const storedToken = sessionStorage.getItem('firebase_custom_token');
+            if (storedToken) {
+                log('Found stored Firebase token, signing in...');
+                sessionStorage.removeItem('firebase_custom_token');
+                sessionStorage.removeItem('firebase_user_info');
+
+                try {
+                    await signInWithCustomToken(auth, storedToken);
+                    log('Signed in with stored token');
+                } catch (error) {
+                    log('Error signing in with stored token: ' + error.message);
+                }
+            }
+        }
+
+        // Login with IdentityServer (redirect flow)
+        window.loginWithIdentityServer = function() {
+            log('Redirecting to IdentityServer for authentication...');
+            const returnUrl = encodeURIComponent(window.location.href);
+            window.location.href = `${AUTH_ENDPOINT}?returnUrl=${returnUrl}`;
+        };
+
+        // Login with popup
+        window.loginWithPopup = function() {
+            log('Opening login popup...');
+
+            const width = 500;
+            const height = 600;
+            const left = (window.screen.width - width) / 2;
+            const top = (window.screen.height - height) / 2;
+
+            const popup = window.open(
+                AUTH_ENDPOINT,
+                'Login',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+            );
+
+            if (!popup) {
+                log('Popup blocked. Please allow popups and try again.');
+                return;
+            }
+
+            // Listen for the token from the popup
+            const handleMessage = async (event) => {
+                if (event.data.type === 'FIREBASE_TOKEN') {
+                    window.removeEventListener('message', handleMessage);
+                    log('Received Firebase token from popup');
+
+                    try {
+                        await signInWithCustomToken(auth, event.data.token);
+                        log('Signed in successfully');
+                    } catch (error) {
+                        log('Error signing in: ' + error.message);
+                    }
+                }
+            };
+
+            window.addEventListener('message', handleMessage);
+        };
+
+        // Logout
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                log('Logged out successfully');
+            } catch (error) {
+                log('Logout error: ' + error.message);
+            }
+        };
+
+        // Save message to Firestore
+        window.saveMessage = async function() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+
+            if (!message) {
+                log('Please enter a message');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                const idTokenResult = await user.getIdTokenResult();
+
+                await addDoc(collection(db, 'messages'), {
+                    text: message,
+                    userId: user.uid,
+                    userEmail: idTokenResult.claims.email || 'unknown',
+                    userName: idTokenResult.claims.name || 'unknown',
+                    createdAt: serverTimestamp()
+                });
+                input.value = '';
+                log('Message saved to Firestore');
+            } catch (error) {
+                log('Error saving message: ' + error.message);
+            }
+        };
+
+        // Load messages from Firestore
+        function loadMessages() {
+            const messagesQuery = query(
+                collection(db, 'messages'),
+                orderBy('createdAt', 'desc'),
+                limit(5)
+            );
+
+            onSnapshot(messagesQuery, (snapshot) => {
+                const messagesList = document.getElementById('messages-list');
+
+                if (snapshot.empty) {
+                    messagesList.innerHTML = '<p class="text-muted">No messages yet</p>';
+                    return;
+                }
+
+                messagesList.innerHTML = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return `
+                        <div class="border-bottom py-2">
+                            <small class="text-muted">${data.userName || data.userEmail || 'Unknown'}</small>
+                            <p class="mb-0">${data.text}</p>
+                        </div>
+                    `;
+                }).join('');
+            }, (error) => {
+                log('Error loading messages: ' + error.message);
+            });
+        }
+
+        // Listen for messages from parent window (when running as micro-frontend)
+        window.addEventListener('message', async function(event) {
+            if (event.data.type === 'FIREBASE_TOKEN') {
+                log('Received Firebase token from parent');
+                try {
+                    await signInWithCustomToken(auth, event.data.token);
+                    log('Signed in with token from parent');
+                } catch (error) {
+                    log('Error signing in with parent token: ' + error.message);
+                }
+            }
+        });
+
+        // Check for stored token on page load
+        checkStoredToken();
+
+        // If running as iframe, notify parent we're ready
+        if (window.parent !== window) {
+            log('Running as micro-frontend');
+            window.parent.postMessage({ type: 'FIREBASE_APP_READY' }, '*');
+        } else {
+            log('Running standalone');
+        }
+    </script>
+</body>
+</html>

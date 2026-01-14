@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="hero">
+    <div class="container">
+        <h1>Welcome to the MVC Client</h1>
+        <p class="lead">This application demonstrates OAuth2/OIDC authentication with a custom Identity Provider</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Identity Provider</h5>
+                    <p class="card-text">A .NET 8 application using Duende IdentityServer implementing OAuth2/OIDC protocols.</p>
+                    <a href="https://recruiting.ultipro.com:5001/.well-known/openid-configuration"
+                       class="btn btn-outline-primary" target="_blank">View Discovery Document</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Secure Page</h5>
+                    <p class="card-text">Access protected resources by authenticating with the Identity Provider.</p>
+                    <a asp-action="Secure" class="btn btn-primary">Go to Secure Page</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Firebase Micro-Frontend</h5>
+                    <p class="card-text">A Firebase application running as a micro-frontend within this MVC app.</p>
+                    <a asp-action="Firebase" class="btn btn-warning">Open Firebase App</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="alert alert-success mt-4">
+            <strong>Authenticated!</strong> You are logged in as @User.Identity.Name
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mt-4">
+            <strong>Not authenticated.</strong> Click on "Secure Page" or "Login" to authenticate with the Identity Provider.
+        </div>
+    }
+</div>

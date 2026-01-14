@@ -1,0 +1,73 @@
+@using Microsoft.AspNetCore.Authentication
+@{
+    ViewData["Title"] = "Secure Page";
+}
+
+<div class="hero">
+    <div class="container">
+        <h1>Secure Page</h1>
+        <p class="lead">This page requires authentication</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">User Claims</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Claim Type</th>
+                        <th>Claim Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in User.Claims)
+                    {
+                        <tr>
+                            <td>@claim.Type</td>
+                            <td>@claim.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @{
+        var authResult = await Context.AuthenticateAsync();
+        var tokens = authResult.Properties?.GetTokens();
+    }
+
+    @if (tokens != null && tokens.Any())
+    {
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Tokens</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Token Type</th>
+                            <th>Token Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var token in tokens)
+                        {
+                            <tr>
+                                <td>@token.Name</td>
+                                <td style="word-break: break-all; max-width: 600px;">
+                                    <small>@token.Value</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
