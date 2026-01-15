@@ -25,7 +25,7 @@ This solution demonstrates a complete OAuth2/OIDC authentication flow using:
 │    IdentityServer    │              │   Firebase Emulators │
 │    (Port 5001)       │              │   - Auth (9099)      │
 │    recruiting.       │              │   - Firestore (8080) │
-│    ultipro.com       │              │   - UI (4000)        │
+│    acme.com       │              │   - UI (4000)        │
 └──────────────────────┘              └──────────────────────┘
 ```
 
@@ -92,7 +92,7 @@ Add the following entry to your hosts file:
 **macOS/Linux**: `/etc/hosts`
 
 ```
-127.0.0.1 recruiting.ultipro.com
+127.0.0.1 myidprovider.acme.com
 ```
 
 ### Step 2: Trust Development Certificates
@@ -143,7 +143,7 @@ dotnet run --launch-profile https
 | Firebase App (standalone) | https://localhost:5002/firebase/index.html |
 | Firebase App (embedded) | https://localhost:5002/Home/Firebase |
 | Firebase Emulator UI | http://localhost:4000 |
-| Identity Server | https://recruiting.ultipro.com:5001 |
+| Identity Server | https://myidprovider.acme.com:5001 |
 
 ## Test Accounts
 
@@ -195,7 +195,7 @@ The controller handles the OAuth2 Authorization Code flow with PKCE:
 The backend uses Firebase Admin SDK to mint custom tokens that include:
 - `email` - User's email from IdentityServer
 - `name` - User's display name
-- `identity_provider` - Set to "ultipro"
+- `identity_provider` - Set to "acme"
 - `idp_sub` - Original subject ID from IdentityServer
 
 ### Firebase App
@@ -211,10 +211,10 @@ The frontend uses `signInWithCustomToken()` to authenticate with Firebase using 
 
 | Endpoint | URL |
 |----------|-----|
-| Discovery | https://recruiting.ultipro.com:5001/.well-known/openid-configuration |
-| Authorize | https://recruiting.ultipro.com:5001/connect/authorize |
-| Token | https://recruiting.ultipro.com:5001/connect/token |
-| UserInfo | https://recruiting.ultipro.com:5001/connect/userinfo |
+| Discovery | https://myidprovider.acme.com:5001/.well-known/openid-configuration |
+| Authorize | https://myidprovider.acme.com:5001/connect/authorize |
+| Token | https://myidprovider.acme.com:5001/connect/token |
+| UserInfo | https://myidprovider.acme.com:5001/connect/userinfo |
 
 ### Configured Clients
 

@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
 {
-    options.Authority = "https://recruiting.ultipro.com:5001";
+    options.Authority = "https://myidprovider.acme.com:5001";
 
     options.ClientId = "mvc-client";
     options.ClientSecret = "mvc-client-secret";

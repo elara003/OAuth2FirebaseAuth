@@ -16,7 +16,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo NOTE: Ensure you have added the following to your hosts file:
-echo   127.0.0.1 recruiting.ultipro.com
+echo   127.0.0.1 myidprovider.acme.com
 echo.
 echo Hosts file location: C:\Windows\System32\drivers\etc\hosts
 echo.
@@ -25,7 +25,7 @@ echo Restoring packages...
 dotnet restore "%~dp0OAuthFireBase.sln"
 
 echo.
-echo Starting Identity Server on https://recruiting.ultipro.com:5001
+echo Starting Identity Server on https://myidprovider.acme.com:5001
 start "Identity Server" cmd /c "cd /d %~dp0src\IdentityServer && dotnet run --launch-profile https"
 
 REM Wait for IDP to start
@@ -38,7 +38,7 @@ echo.
 echo Both services are starting...
 echo.
 echo Access points:
-echo   - Identity Server: https://recruiting.ultipro.com:5001
+echo   - Identity Server: https://myidprovider.acme.com:5001
 echo   - MVC Client: https://localhost:5002
 echo   - Firebase App: https://localhost:5002/Home/Firebase
 echo.

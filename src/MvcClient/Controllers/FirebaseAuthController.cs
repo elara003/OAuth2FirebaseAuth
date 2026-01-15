@@ -23,7 +23,7 @@ public class FirebaseAuthController : Controller
     private readonly ILogger<FirebaseAuthController> _logger;
 
     // OIDC/OAuth2 configuration
-    private const string IdentityServerAuthority = "https://recruiting.ultipro.com:5001";
+    private const string IdentityServerAuthority = "https://myidprovider.acme.com:5001";
     private const string ClientId = "firebase-client";
     private const string RedirectUri = "https://localhost:5002/api/firebase-auth/callback";
 
@@ -291,12 +291,12 @@ public class FirebaseAuthController : Controller
             ["email"] = userInfo.Email ?? "",
             ["name"] = userInfo.Name ?? userInfo.PreferredUsername ?? "",
             ["email_verified"] = true,
-            ["identity_provider"] = "ultipro",
+            ["identity_provider"] = "acme",
             ["idp_sub"] = userInfo.Sub
         };
 
         // Create a unique Firebase UID based on the IdP subject
-        var firebaseUid = $"ultipro_{userInfo.Sub}";
+        var firebaseUid = $"acme_{userInfo.Sub}";
 
         // Mint the custom token
         var customToken = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(firebaseUid, claims);

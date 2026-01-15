@@ -16,10 +16,10 @@ if ! command -v dotnet &> /dev/null; then
 fi
 
 # Check hosts file
-if ! grep -q "recruiting.ultipro.com" /etc/hosts 2>/dev/null; then
-    echo "WARNING: recruiting.ultipro.com not found in /etc/hosts"
+if ! grep -q "myidprovider.acme.com" /etc/hosts 2>/dev/null; then
+    echo "WARNING: myidprovider.acme.com not found in /etc/hosts"
     echo "Please add the following line to your hosts file:"
-    echo "  127.0.0.1 recruiting.ultipro.com"
+    echo "  127.0.0.1 myidprovider.acme.com"
     echo ""
 fi
 
@@ -30,7 +30,7 @@ echo "Restoring packages..."
 dotnet restore "$SCRIPT_DIR/OAuthFireBase.sln"
 
 echo ""
-echo "Starting Identity Server on https://recruiting.ultipro.com:5001"
+echo "Starting Identity Server on https://myidprovider.acme.com:5001"
 echo "Starting MVC Client on https://localhost:5002"
 echo ""
 echo "Press Ctrl+C to stop all services"
