@@ -6,6 +6,7 @@
 
 # Visual Studio
 .vs/
+.vscode/
 *.user
 *.suo
 *.userosscache
